@@ -1,5 +1,5 @@
 {
-  "name": "opendata",
+  "name": "sensors-data-api",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
