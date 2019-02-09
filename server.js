@@ -59,7 +59,14 @@ setInterval(function() {
 },1000 * 60 * 60);
 //},1000 * 60 * 60);
 
-
-app.get('/', (req, res) => res.send('working!'));
-
+app.get('/sensors-data', (req,res)=>{
+  Entry.find({}).exec(function(error, allEntries){
+    if(error){
+      console.log("didn't find anything :(");
+    }
+    else{
+      res.json(allEntries)
+    }
+  })
+})
 app.listen(port, () => console.log(`The surver is running on port ${port}!`))
