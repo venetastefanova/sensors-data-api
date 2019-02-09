@@ -35,31 +35,45 @@ const dataEntrySchema = new mongoose.Schema({
 // Compile model from schema
 var Entry = mongoose.model('SomeEntry', dataEntrySchema);
 
+function getEvent () {
+  axios.get("https://opendata.hopefully.works/api/events", eventsHeader)
+  .then(response=>{ 
+    console.log(response.data);
+    //save the respose to DB
+    new Entry({
+      date: response.data.date,
+      sensor1: response.data.sensor1,
+      sensor2: response.data.sensor2,
+      sensor3: response.data.sensor3,
+      sensor4: response.data.sensor4
+    }).save(function (error) {
+      if (error){
+        console.log(error)
+      }
+    });
+  })
+  .catch(error=>{
+    console.log(error)
+  })
+}
+
 //gets the data from events API every 1h and save it to the database
 setInterval(function() {
-    axios.get("https://opendata.hopefully.works/api/events", eventsHeader)
-    .then(response=>{ 
-      console.log(response.data);
-      //save the respose to DB
-      new Entry({
-        date: response.data.date,
-        sensor1: response.data.sensor1,
-        sensor2: response.data.sensor2,
-        sensor3: response.data.sensor3,
-        sensor4: response.data.sensor4
-      }).save(function (error) {
-        if (error){
-          console.log(error)
-        }
-      });
-    })
-    .catch(error=>{
-      console.log(error)
-    })
+   getEvent();
 },1000 * 60 * 60);
 //},1000 * 60 * 60);
 
+getEvent();
 
-app.get('/', (req, res) => res.send('working!'));
 
-app.listen(port, () => console.log(`The surver is running on port ${port}!`))
+app.get('/sensors-data', (req,res)=>{
+  Entry.find({}).exec(function(error, allEntries){
+    if(error){
+      console.log("didn't find anything :(");
+    }
+    else{
+      res.json(allEntries)
+    }
+  })
+})
+app.listen(process.env.PORT || port, () => console.log(`The surver is running on port ${port}!`))
